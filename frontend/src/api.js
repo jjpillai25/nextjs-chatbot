@@ -6,7 +6,7 @@ export class BackendUnavailableError extends Error {
   }
 }
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://techpals-chatbot.onrender.com";
 
 /**
  * Wrapper for API fetch requests with error handling

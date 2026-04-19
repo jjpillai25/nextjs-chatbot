@@ -1,7 +1,11 @@
 from openai import OpenAI
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 client = OpenAI(
-    api_key="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", #(who you are)
+    api_key=os.getenv("GROQ_API_KEY"), #(who you are)
     base_url="https://api.groq.com/openai/v1"    #(Where to send the req)
 )
 

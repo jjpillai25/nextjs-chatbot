@@ -107,19 +107,14 @@ function ChatPage() {
     try {
       let currentConversationId = conversationId;
 
-      /*if (!currentConversationId) {
+      if (!currentConversationId) {
         const convData = await createConversation(userId, message);
         currentConversationId = convData.id;
         setConversationId(currentConversationId);
         fetchConversations();
-      }*/
+      }
 
       const data = await sendChatMessage(currentConversationId, userId, message);
-
-      if (!currentConversationId) {
-        setConversationId(data.conversation_id);
-        fetchConversations();
-      }
       
       setChat([...newChat, { sender: "bot", text: data.response }]);
       setBackendDown(false);

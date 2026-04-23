@@ -20,6 +20,7 @@ function ChatPage() {
   const [backendDown, setBackendDown] = useState(false);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
   const navigate = useNavigate();
   const userEmail = getUserEmail();
   const userId = getUserId();
@@ -182,6 +183,22 @@ function ChatPage() {
     }
   };
 
+  // Auto-expand textarea as user types
+  const handleMessageChange = (e) => {
+    setMessage(e.target.value);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 300) + "px";
+    }
+  };
+
+  // Reset textarea height when message is cleared
+  useEffect(() => {
+    if (textareaRef.current && !message) {
+      textareaRef.current.style.height = "auto";
+    }
+  }, [message]);
+
   const handleSearchKeyDown = (e) => {
     if (e.key === "Escape") {
       setSearchQuery("");
@@ -193,6 +210,33 @@ function ChatPage() {
     setBackendDown(false);
     fetchConversations();
   };
+
+  // Format timestamp to readable format
+  const formatTimestamp = (dateString) => {
+    if (!dateString) return "Unknown";
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      // Less than 1 minute
+      if (diffMins < 1) return "Just now";
+      // Less than 1 hour
+      if (diffHours < 1) return `${diffMins}m ago`;
+      // Less than 1 day
+      if (diffDays < 1) return `${diffHours}h ago`;
+      // Less than 7 days
+      if (diffDays < 7) return `${diffDays}d ago`;
+      // Format as date
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: date.getFullYear() === now.getFullYear() ? undefined : "numeric" });
+    } catch (error) {
+      return "Unknown";
+    }
+  };
+
   // Filter conversations based on search query
   const filteredConversations = searchQuery.trim() === ""
     ? conversations
@@ -263,6 +307,7 @@ function ChatPage() {
                         onClick={() => loadConversation(conv.id)}
                       >
                         <span className="sidebar__conversation-title">{conv.title}</span>
+                        <span className="sidebar__conversation-timestamp">{formatTimestamp(conv.created_at)}</span>
                       </button>
                       <button
                         className="sidebar__conversation-delete"
@@ -422,8 +467,9 @@ function ChatPage() {
                 📎
               </button>
               <textarea
+                ref={textareaRef}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={handleMessageChange}
                 placeholder="Type your message here..."
                 onKeyDown={handleKeyDown}
                 className="chat-input"

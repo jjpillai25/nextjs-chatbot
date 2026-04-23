@@ -116,7 +116,10 @@ body {
 
 .sidebar__conversation {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
   padding: 8px 10px;
   border: none;
   background: none;
@@ -143,6 +146,15 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%;
+  font-weight: 500;
+}
+
+.sidebar__conversation-timestamp {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.7;
+  white-space: nowrap;
 }
 
 .sidebar__conversation-wrapper {
@@ -480,6 +492,7 @@ body {
   flex-shrink: 0;
   display: flex;
   gap: 12px;
+  align-items: flex-start;
 }
 
 .chat-input {
@@ -491,8 +504,8 @@ body {
   font-size: 14px;
   color: var(--text);
   resize: none;
-  max-height: 120px;
-  overflow-y: auto;
+  min-height: 40px;
+  overflow: hidden;
 }
 
 .chat-input:focus {
@@ -514,6 +527,11 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  flex-shrink: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .send-btn:hover:not(:disabled) {
@@ -665,6 +683,7 @@ body {
   display: flex;
   gap: 12px;
   flex: 1;
+  align-items: flex-start;
 }
 
 .attachment-preview {

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.db import get_db
-from app.schemas.conversation_schema import ConversationCreate, ConversationDelete, ConversationResponse
-from app.services.conversation_service import create_conversation, get_all_conversations, delete_conversation
+from app.schemas.conversation_schema import ConversationCreate, ConversationDelete, ConversationRename, ConversationResponse
+from app.services.conversation_service import create_conversation, get_all_conversations, delete_conversation, rename_conversation
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -29,5 +29,15 @@ def remove_conversation(conversation_id: int, request: ConversationDelete, db: S
         if not success:
             raise HTTPException(status_code=404, detail="Conversation not found")
         return {"message": "Conversation deleted successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{conversation_id}", response_model=ConversationResponse)
+def update_conversation(conversation_id: int, request: ConversationRename, db: Session = Depends(get_db)):
+    try:
+        conversation = rename_conversation(db, conversation_id, request.user_id, request.title)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        return conversation
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

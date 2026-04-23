@@ -33,3 +33,16 @@ def delete_conversation(db: Session, conversation_id: int, user_id: int) -> bool
     db.delete(conversation)
     db.commit()
     return True
+
+@retry_on_connection_error
+def rename_conversation(db: Session, conversation_id: int, user_id: int, new_title: str) -> Conversation:
+    conversation = db.query(Conversation).filter(
+        Conversation.id == conversation_id,
+        Conversation.user_id == user_id
+    ).first()
+    if not conversation:
+        return None
+    conversation.title = new_title
+    db.commit()
+    db.refresh(conversation)
+    return conversation

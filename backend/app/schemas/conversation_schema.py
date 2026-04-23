@@ -11,6 +11,11 @@ class ConversationDelete(BaseModel):
     user_id: int
 
 
+class ConversationRename(BaseModel):
+    user_id: int
+    title: str
+
+
 class ConversationResponse(BaseModel):
     id: int
     user_id: int

@@ -96,6 +96,16 @@ export async function deleteConversation(conversationId, userId) {
 }
 
 /**
+ * Rename a conversation
+ */
+export async function renameConversation(conversationId, userId, newTitle) {
+  return apiFetch(`/conversations/${parseInt(conversationId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ user_id: parseInt(userId), title: newTitle }),
+  });
+}
+
+/**
  * Reset chat history
  */
 export async function resetChat(userId, conversationId) {

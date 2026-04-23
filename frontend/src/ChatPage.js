@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./App.css";
 import ReactMarkdown from "react-markdown";
 import ServiceUnavailable from "./ServiceUnavailable";
-import { getConversations, getChatMessages, sendChatMessage, deleteConversation, resetChat, BackendUnavailableError } from "./api";
+import { getConversations, getChatMessages, sendChatMessage, deleteConversation, resetChat, renameConversation, BackendUnavailableError } from "./api";
 import { getUserId, getUserEmail, getUserInitials, clearAuthData } from "./auth";
 
 function ChatPage() {
@@ -18,9 +18,12 @@ function ChatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [backendDown, setBackendDown] = useState(false);
+  const [editingConversationId, setEditingConversationId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const editInputRef = useRef(null);
   const navigate = useNavigate();
   const userEmail = getUserEmail();
   const userId = getUserId();
@@ -201,6 +204,50 @@ function ChatPage() {
     }
   };
 
+  const startEditingConversation = (conv) => {
+    setEditingConversationId(conv.id);
+    setEditTitle(conv.title);
+    setTimeout(() => editInputRef.current?.focus(), 0);
+  };
+
+  const cancelEditingConversation = () => {
+    setEditingConversationId(null);
+    setEditTitle("");
+  };
+
+  const saveConversationRename = async (convId) => {
+    if (!editTitle.trim() || !userId) {
+      cancelEditingConversation();
+      return;
+    }
+
+    try {
+      await renameConversation(convId, userId, editTitle);
+      // Update local conversations state
+      setConversations(conversations.map(conv => 
+        conv.id === convId ? { ...conv, title: editTitle } : conv
+      ));
+      setBackendDown(false);
+    } catch (err) {
+      if (err instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        console.error("Failed to rename conversation:", err);
+      }
+    }
+    cancelEditingConversation();
+  };
+
+  const handleRenameKeyDown = (e, convId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      saveConversationRename(convId);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      cancelEditingConversation();
+    }
+  };
+
   const handleRetry = () => {
     setBackendDown(false);
     fetchConversations();
@@ -297,13 +344,37 @@ function ChatPage() {
                       key={conv.id}
                       className={`sidebar__conversation-wrapper ${conv.id === conversationId ? "sidebar__conversation-wrapper--active" : ""}`}
                     >
-                      <button
-                        className={`sidebar__conversation ${conv.id === conversationId ? "sidebar__conversation--active" : ""}`}
-                        onClick={() => loadConversation(conv.id)}
-                      >
-                        <span className="sidebar__conversation-title">{conv.title}</span>
-                        <span className="sidebar__conversation-timestamp">{formatTimestamp(conv.created_at)}</span>
-                      </button>
+                      {editingConversationId === conv.id ? (
+                        <div className="sidebar__conversation-edit">
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            className="sidebar__conversation-edit-input"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onKeyDown={(e) => handleRenameKeyDown(e, conv.id)}
+                            onBlur={() => saveConversationRename(conv.id)}
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            className={`sidebar__conversation ${conv.id === conversationId ? "sidebar__conversation--active" : ""}`}
+                            onClick={() => loadConversation(conv.id)}
+                            onDoubleClick={() => startEditingConversation(conv)}
+                          >
+                            <span className="sidebar__conversation-title">{conv.title}</span>
+                            <span className="sidebar__conversation-timestamp">{formatTimestamp(conv.created_at)}</span>
+                          </button>
+                          <button
+                            className="sidebar__conversation-edit-btn"
+                            onClick={() => startEditingConversation(conv)}
+                            title="Rename conversation"
+                          >
+                            ✏️
+                          </button>
+                        </>
+                      )}
                       <button
                         className="sidebar__conversation-delete"
                         onClick={(e) => handleDeleteConversation(conv.id, e)}

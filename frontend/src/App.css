@@ -200,6 +200,55 @@ body {
   background: rgba(220, 53, 69, 0.2);
 }
 
+.sidebar__conversation-edit-btn {
+  display: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.sidebar__conversation-wrapper:hover .sidebar__conversation-edit-btn {
+  display: flex;
+}
+
+.sidebar__conversation-edit-btn:hover {
+  color: var(--blue);
+  background: var(--blue-light);
+}
+
+.sidebar__conversation-edit {
+  flex: 1;
+  padding: 4px;
+}
+
+.sidebar__conversation-edit-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(11, 115, 221, 0.1);
+}
+
+.sidebar__conversation-edit-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(11, 115, 221, 0.2);
+}
+
 /* Search */
 .sidebar__search-container {
   padding: 0 8px;

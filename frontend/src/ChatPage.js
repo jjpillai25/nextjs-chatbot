@@ -117,7 +117,7 @@ function ChatPage() {
       const data = await sendChatMessage(currentConversationId, userId, message);
 
       if (!currentConversationId) {
-        setConversationId(data.currentConversationId);
+        setConversationId(data.conversation_id);
         fetchConversations();
       }
       

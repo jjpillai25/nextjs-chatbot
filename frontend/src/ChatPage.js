@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./App.css";
 import ReactMarkdown from "react-markdown";
 import ServiceUnavailable from "./ServiceUnavailable";
-import { getConversations, getChatMessages, sendChatMessage, deleteConversation, resetChat, renameConversation, BackendUnavailableError } from "./api";
+import { getConversations, getChatMessages, sendChatMessage, createConversation, deleteConversation, resetChat, renameConversation, BackendUnavailableError } from "./api";
 import { getUserId, getUserEmail, getUserInitials, clearAuthData } from "./auth";
 
 function ChatPage() {

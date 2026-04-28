@@ -1,31 +1,27 @@
 from sqlalchemy.orm import Session
 from app.models.conversation_model import Conversation
 from app.core.retry import retry_on_connection_error
-from app.services.llm_service import client
 
 def extract_main_idea(message: str) -> str:
-    """Extract the main idea from a message using LLM, limited to 4 words max."""
-    try:
-        response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a title generator. Extract the main idea from the given message in 4 words or less. Reply with ONLY the title, nothing else."
-                },
-                {"role": "user", "content": message}
-            ],
-            temperature=0.3,
-            max_tokens=20,
-        )
-        title = response.choices[0].message.content.strip()
-        # Ensure it doesn't exceed reasonable length
-        return title[:50] if title else "Chat"
-    except Exception as e:
-        # Fallback if LLM call fails
-        print(f"Error extracting title: {e}")
-        words = message.split()[:4]
-        return " ".join(words) if words else "Chat"
+    """Extract the main idea from a message, limited to 4 words max."""
+    # Remove extra whitespace and get first line if multi-line
+    message = message.strip().split('\n')[0]
+    
+    # Common filler words to skip
+    filler_words = {'and', 'or', 'the', 'a', 'an', 'to', 'is', 'in', 'on', 'at', 'by', 'for', 'of', 'with', 'i', 'me', 'my', 'you', 'your', 'we', 'our', 'it', 'its', 'this', 'that', 'these', 'those', 'can', 'could', 'would', 'should', 'do', 'does', 'did', 'be', 'been', 'being', 'have', 'has', 'had'}
+    
+    # Split into words and filter out filler words
+    words = message.lower().split()
+    meaningful_words = [word for word in words if word not in filler_words and len(word) > 1]
+    
+    # Take first 4 meaningful words and capitalize
+    title_words = meaningful_words[:4]
+    if not title_words:
+        # If no meaningful words found, just take first 4 words
+        title_words = words[:4]
+    
+    title = " ".join(title_words).title()
+    return title[:50] if title else "Chat"
 
 def generate_title(first_message: str, attachment_name: str = None) -> str:
     # If attachment name is provided, use it as the title

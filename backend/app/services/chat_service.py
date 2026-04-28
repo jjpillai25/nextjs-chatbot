@@ -2,12 +2,14 @@ from sqlalchemy.orm import Session
 from app.models.chat_model import Chat
 from app.models.conversation_model import Conversation
 from app.services.llm_service import get_llmMessages
+from app.services.conversation_service import generate_title
 from app.core.retry import retry_on_connection_error
 
 @retry_on_connection_error
 def handle_chat(db: Session, conversation_id: int, user_id: int, user_message: str)  :
     if not conversation_id:
-        new_conversation = Conversation(user_id=user_id, title=user_message[:30])
+        title = generate_title(user_message)
+        new_conversation = Conversation(user_id=user_id, title=title)
         db.add(new_conversation)
         db.commit()
         db.refresh(new_conversation)
